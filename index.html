@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
+<title>PS Game Helper - PlayStation Controls & Tips</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">
+          <span class="ps-btn tri"></span>
+          <span class="ps-btn circle"></span>
+          <span class="ps-btn cross"></span>
+          <span class="ps-btn square"></span>
+        </div>
+        <h1>PS Game Helper</h1>
+      </div>
+      <div class="header-controls">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search games, controls, tips..." autocomplete="off">
+          <div id="searchResults" class="search-dropdown hidden"></div>
+        </div>
+        <button id="favToggle" class="icon-btn" title="Favorites">&#9733;</button>
+        <button id="themeToggle" class="icon-btn" title="Toggle theme">&#9789;</button>
+      </div>
+    </div>
+    <nav id="gameNav">
+      <!-- Populated by JS -->
+    </nav>
+    <div class="difficulty-legend">
+      <span class="legend-item beginner">&#9679; Beginner</span>
+      <span class="legend-item intermediate">&#9679; Intermediate</span>
+      <span class="legend-item advanced">&#9679; Advanced</span>
+      <span class="legend-item expert">&#9679; Expert</span>
+    </div>
+  </header>
+
+  <main id="mainContent">
+    <!-- Landing page -->
+    <section id="landing" class="landing">
+      <h2>Master Your PlayStation Games</h2>
+      <p>Select a game above to discover controls from basic to expert level. The further you scroll, the more powerful the techniques.</p>
+      <div id="gameGrid" class="game-grid">
+        <!-- Populated by JS -->
+      </div>
+      <div class="stats-bar">
+        <div class="stat"><span id="statGames">0</span> Games</div>
+        <div class="stat"><span id="statTips">0</span> Tips</div>
+        <div class="stat"><span id="statFavs">0</span> Favorites</div>
+      </div>
+    </section>
+
+    <!-- Game detail page -->
+    <section id="gameDetail" class="game-detail hidden">
+      <div class="game-header">
+        <button id="backBtn" class="back-btn">&larr; All Games</button>
+        <div class="game-title-row">
+          <div class="game-icon-large" id="gameIconLarge"></div>
+          <div>
+            <h2 id="gameTitle"></h2>
+            <p id="gameDesc" class="game-desc"></p>
+            <div id="gameTags" class="game-tags"></div>
+          </div>
+        </div>
+        <div class="filter-row">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="beginner">Beginner</button>
+          <button class="filter-btn" data-filter="intermediate">Intermediate</button>
+          <button class="filter-btn" data-filter="advanced">Advanced</button>
+          <button class="filter-btn" data-filter="expert">Expert</button>
+        </div>
+      </div>
+      <div id="tipsContainer" class="tips-container">
+        <!-- Populated by JS -->
+      </div>
+      <div id="progressBar" class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+        <span id="progressText">0% explored</span>
+      </div>
+    </section>
+
+    <!-- Favorites page -->
+    <section id="favoritesPage" class="favorites-page hidden">
+      <h2>&#9733; Your Favorites</h2>
+      <div id="favoritesContainer" class="tips-container"></div>
+      <p id="noFavs" class="no-favs hidden">No favorites yet. Star tips to save them here!</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>PS Game Helper &mdash; 100% Free, No Ads, No Tracking</p>
+    <p class="footer-sub">All trademarks belong to their respective owners. This is a fan-made resource.</p>
+  </footer>
+</div>
+<script src="games.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
