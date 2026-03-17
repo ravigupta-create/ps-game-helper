@@ -16,7 +16,8 @@
     cheatSheet: false,
     favorites: JSON.parse(localStorage.getItem("psg_favorites") || "[]"),
     theme: localStorage.getItem("psg_theme") || "dark",
-    searchIdx: -1, // keyboard nav index for search
+    yearSelections: JSON.parse(localStorage.getItem("psg_years") || "{}"),
+    searchIdx: -1,
   };
 
   // === DOM REFS ===
@@ -38,9 +39,11 @@
     randomBtn: $("#randomTip"), randomModal: $("#randomModal"),
     randomContent: $("#randomTipContent"), closeRandom: $("#closeRandom"),
     nextRandom: $("#nextRandom"),
+    yearSelector: $("#yearSelector"), yearSelect: $("#yearSelect"),
+    yearNotes: $("#yearNotes"),
   };
 
-  // === SEARCH INDEX (pre-built for efficiency) ===
+  // === SEARCH INDEX ===
   let searchIndex = [];
   function buildSearchIndex() {
     searchIndex = [];
@@ -53,9 +56,125 @@
     });
   }
 
+  // === YEAR SYSTEM ===
+  // Get the user's selected year for a yearly game, or the current/default year
+  function getSelectedYear(gameId) {
+    if (state.yearSelections[gameId] !== undefined) {
+      return parseInt(state.yearSelections[gameId]);
+    }
+    // Default to the max year (current)
+    const yc = typeof YEAR_CHANGES !== "undefined" ? YEAR_CHANGES[gameId] : null;
+    return yc ? yc.maxYear : CURRENT_YEAR;
+  }
+
+  function setSelectedYear(gameId, year) {
+    state.yearSelections[gameId] = year;
+    localStorage.setItem("psg_years", JSON.stringify(state.yearSelections));
+  }
+
+  // Get the display name for a game at a specific year
+  function getGameNameForYear(game, year) {
+    const yc = typeof YEAR_CHANGES !== "undefined" ? YEAR_CHANGES[game.id] : null;
+    if (yc && yc.nameFormat) {
+      return yc.nameFormat(year);
+    }
+    return game.name;
+  }
+
+  // Build the tips list for a game at a specific year
+  // - Removes tips that didn't exist in that year
+  // - Adds year-specific tips
+  // - Marks tips as "new in [year]" where applicable
+  function getTipsForYear(game, year) {
+    const yc = typeof YEAR_CHANGES !== "undefined" ? YEAR_CHANGES[game.id] : null;
+    if (!yc || year === yc.maxYear) {
+      // Current year = use base tips as-is
+      return game.tips.map(function(t) { return Object.assign({}, t); });
+    }
+
+    // Build set of removed tip titles for this year and all years before it up to selected
+    var removedTitles = new Set();
+    var addedTips = [];
+
+    // For the selected year, gather what's removed and added
+    var yearData = yc.changes[year];
+    if (yearData) {
+      if (yearData.removed) {
+        yearData.removed.forEach(function(t) { removedTitles.add(t); });
+      }
+      if (yearData.added) {
+        yearData.added.forEach(function(t) {
+          var tip = Object.assign({}, t);
+          tip._yearAdded = year;
+          addedTips.push(tip);
+        });
+      }
+    }
+
+    // Filter base tips: remove ones that didn't exist
+    var tips = game.tips.filter(function(t) {
+      return !removedTitles.has(t.title);
+    }).map(function(t) { return Object.assign({}, t); });
+
+    // Add year-specific tips
+    tips = tips.concat(addedTips);
+
+    return tips;
+  }
+
+  function getYearNotes(gameId, year) {
+    var yc = typeof YEAR_CHANGES !== "undefined" ? YEAR_CHANGES[gameId] : null;
+    if (!yc) return "";
+    var yd = yc.changes[year];
+    return yd && yd.notes ? yd.notes : "";
+  }
+
+  // Setup the year selector dropdown for a game
+  function setupYearSelector(game) {
+    var yc = typeof YEAR_CHANGES !== "undefined" ? YEAR_CHANGES[game.id] : null;
+    if (!game.yearlyUpdate || !yc) {
+      dom.yearSelector.classList.add("hidden");
+      return;
+    }
+
+    dom.yearSelector.classList.remove("hidden");
+    var selectedYear = getSelectedYear(game.id);
+
+    // Populate dropdown
+    var html = "";
+    for (var y = yc.maxYear; y >= yc.minYear; y--) {
+      var label = getGameNameForYear(game, y);
+      var sel = (y === selectedYear) ? " selected" : "";
+      html += '<option value="' + y + '"' + sel + '>' + sanitize(label) + (y === yc.maxYear ? " (Latest)" : "") + '</option>';
+    }
+    dom.yearSelect.innerHTML = html;
+
+    // Show notes
+    var notes = getYearNotes(game.id, selectedYear);
+    dom.yearNotes.textContent = notes;
+  }
+
+  function onYearChange() {
+    if (!state.currentGame) return;
+    var year = parseInt(dom.yearSelect.value);
+    setSelectedYear(state.currentGame.id, year);
+
+    // Update title
+    var displayName = getGameNameForYear(state.currentGame, year);
+    dom.gameTitle.textContent = displayName;
+
+    // Update notes
+    var notes = getYearNotes(state.currentGame.id, year);
+    dom.yearNotes.textContent = notes;
+
+    // Re-render tips for selected year
+    var tips = getTipsForYear(state.currentGame, year);
+    renderTips(tips, year, state.currentGame);
+    updateProgress();
+  }
+
   // === INIT ===
   function init() {
-    // Efficiency: sort games by category for consistent ordering
     GAMES.sort((a, b) => {
       const catOrder = ["sports","action","rpg","openworld","shooter","fighting","adventure","racing","indie","misc"];
       return catOrder.indexOf(a.category) - catOrder.indexOf(b.category);
@@ -98,9 +217,15 @@
     const games = getFilteredGames();
     let html = "";
     games.forEach((g) => {
+      // Use year-appropriate name if yearly
+      var displayName = g.name;
+      if (g.yearlyUpdate && typeof YEAR_CHANGES !== "undefined" && YEAR_CHANGES[g.id]) {
+        var yr = getSelectedYear(g.id);
+        displayName = getGameNameForYear(g, yr);
+      }
       html += `<button class="nav-btn" data-game="${sanitize(g.id)}">
         <span class="nav-icon" style="background:${sanitize(g.color)}">${sanitize(g.icon)}</span>
-        ${sanitize(g.name)}
+        ${sanitize(displayName)}
       </button>`;
     });
     dom.nav.innerHTML = html;
@@ -112,11 +237,25 @@
     let html = "";
     games.forEach((g) => {
       const tipCount = g.tips.length;
+      var displayName = g.name;
+      if (g.yearlyUpdate && typeof YEAR_CHANGES !== "undefined" && YEAR_CHANGES[g.id]) {
+        var yr = getSelectedYear(g.id);
+        displayName = getGameNameForYear(g, yr);
+      }
+      var yearBadge = "";
+      if (g.yearlyUpdate) {
+        var selYr = getSelectedYear(g.id);
+        var yc = typeof YEAR_CHANGES !== "undefined" ? YEAR_CHANGES[g.id] : null;
+        if (yc && selYr !== yc.maxYear) {
+          yearBadge = '<div class="card-cat" style="color:var(--accent)">' + sanitize(String(selYr)) + ' Edition</div>';
+        }
+      }
       html += `<div class="game-card" data-game="${sanitize(g.id)}">
         <div class="card-icon" style="background:${sanitize(g.color)}">${sanitize(g.icon)}</div>
-        <h3>${sanitize(g.name)}</h3>
+        <h3>${sanitize(displayName)}</h3>
         <div class="card-genre">${sanitize(g.genre)}</div>
         <div class="card-count">${tipCount} tips & controls</div>
+        ${yearBadge}
         <div class="card-cat">${sanitize(g.category)}</div>
       </div>`;
     });
@@ -146,7 +285,14 @@
     dom.detail.classList.remove("hidden");
     dom.progressBar.classList.remove("hidden");
 
-    dom.gameTitle.textContent = game.name;
+    // Year-aware name
+    var selectedYear = getSelectedYear(game.id);
+    var displayName = game.name;
+    if (game.yearlyUpdate && typeof YEAR_CHANGES !== "undefined" && YEAR_CHANGES[game.id]) {
+      displayName = getGameNameForYear(game, selectedYear);
+    }
+
+    dom.gameTitle.textContent = displayName;
     dom.gameDesc.textContent = game.desc;
     dom.gameIconLarge.style.background = game.color;
     dom.gameIconLarge.textContent = game.icon;
@@ -158,34 +304,48 @@
     }
     dom.gameTags.innerHTML = tagsHtml;
 
+    // Setup year selector
+    setupYearSelector(game);
+
     $$(".filter-btn").forEach((btn) => btn.classList.toggle("active", btn.dataset.filter === "all"));
-    renderTips(game.tips);
+
+    // Get year-appropriate tips
+    var tips = getTipsForYear(game, selectedYear);
+    renderTips(tips, selectedYear, game);
     updateProgress();
     window.location.hash = gameId;
     $$(".nav-btn").forEach((btn) => btn.classList.toggle("active", btn.dataset.game === gameId));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // === RENDER TIPS WITH SECTION HEADERS ===
-  function renderTips(tips) {
-    const filtered = state.currentFilter === "all" ? tips : tips.filter((t) => t.level === state.currentFilter);
+  // === RENDER TIPS ===
+  function renderTips(tips, selectedYear, gameOverride) {
+    var game = gameOverride || state.currentGame;
+    var filtered = state.currentFilter === "all" ? tips : tips.filter((t) => t.level === state.currentFilter);
     let html = "";
     let lastSection = "";
+    var yc = typeof YEAR_CHANGES !== "undefined" && game ? YEAR_CHANGES[game.id] : null;
+    var isOlderYear = yc && selectedYear && selectedYear !== yc.maxYear;
 
     filtered.forEach((tip, i) => {
-      // Section header
       if (tip.section && tip.section !== lastSection) {
         lastSection = tip.section;
         html += `<div class="section-header">${sanitize(tip.section)}</div>`;
       }
-      const favKey = state.currentGame.id + "::" + tip.title;
+      const favKey = (game ? game.id : "unknown") + "::" + tip.title;
       const isFav = state.favorites.includes(favKey);
       let controlsHtml = "";
       tip.controls.forEach((c) => { controlsHtml += `<span class="control-badge">${sanitize(c)}</span>`; });
 
+      // Year badge
+      var yearBadgeHtml = "";
+      if (tip._yearAdded) {
+        yearBadgeHtml = '<span class="year-badge added">New in ' + sanitize(String(tip._yearAdded)) + '</span>';
+      }
+
       html += `<div class="tip-card ${sanitize(tip.level)}" data-index="${i}">
         <div class="tip-header">
-          <span class="tip-title">${sanitize(tip.title)}</span>
+          <span class="tip-title">${sanitize(tip.title)}${yearBadgeHtml}</span>
           <div class="tip-badges">
             <span class="tip-level ${sanitize(tip.level)}">${sanitize(tip.level)}</span>
             <button class="fav-btn ${isFav ? "active" : ""}" data-fav="${sanitize(favKey)}" title="Save to favorites">
@@ -199,10 +359,26 @@
       </div>`;
     });
 
+    // Show removed tips notice for older years
+    if (isOlderYear && yc.changes[selectedYear] && yc.changes[selectedYear].removed && yc.changes[selectedYear].removed.length > 0) {
+      var removedList = yc.changes[selectedYear].removed;
+      html += '<div style="margin-top:16px;padding:14px 18px;background:var(--bg3);border:1px solid var(--expert);border-radius:var(--radius);font-size:.82rem">';
+      html += '<strong style="color:var(--expert)">Not available in this edition:</strong><br>';
+      removedList.forEach(function(r) {
+        html += '<span class="year-badge removed" style="margin:3px 2px;display:inline-block">' + sanitize(r) + '</span> ';
+      });
+      html += '<div style="margin-top:6px;color:var(--text2);font-size:.75rem">These controls/features were added in a later edition. Upgrade to access them.</div>';
+      html += '</div>';
+    }
+
     if (filtered.length === 0) {
       html = `<div style="text-align:center;padding:40px;color:var(--text2)">No tips found for this filter.</div>`;
     }
     dom.tipsContainer.innerHTML = html;
+
+    // Store tips reference for filter changes
+    state._currentTips = tips;
+    state._currentYear = selectedYear;
   }
 
   // === FAVORITES ===
@@ -212,7 +388,9 @@
     else state.favorites.splice(idx, 1);
     localStorage.setItem("psg_favorites", JSON.stringify(state.favorites));
     updateStats();
-    if (state.currentGame) renderTips(state.currentGame.tips);
+    if (state.currentGame && state._currentTips) {
+      renderTips(state._currentTips, state._currentYear, state.currentGame);
+    }
   }
 
   function showFavorites() {
@@ -231,7 +409,9 @@
     dom.noFavs.classList.add("hidden");
     let html = "";
     state.favorites.forEach((favKey) => {
-      const [gameId, tipTitle] = favKey.split("::");
+      const parts = favKey.split("::");
+      const gameId = parts[0];
+      const tipTitle = parts.slice(1).join("::");
       const game = GAMES.find((g) => g.id === gameId);
       if (!game) return;
       const tip = game.tips.find((t) => t.title === tipTitle);
@@ -255,7 +435,7 @@
     dom.favoritesContainer.innerHTML = html;
   }
 
-  // === SEARCH (enhanced with keyboard nav) ===
+  // === SEARCH ===
   let searchDebounce = null;
   function handleSearch(query) {
     clearTimeout(searchDebounce);
@@ -268,13 +448,10 @@
       const q = query.toLowerCase();
       const results = [];
       for (let i = 0; i < searchIndex.length && results.length < 20; i++) {
-        const entry = searchIndex[i];
-        if (entry.text.includes(q)) {
-          results.push(entry);
-        }
+        if (searchIndex[i].text.includes(q)) results.push(searchIndex[i]);
       }
       if (results.length === 0) {
-        dom.searchResults.innerHTML = `<div class="search-item">No results found</div>`;
+        dom.searchResults.innerHTML = '<div class="search-item">No results found</div>';
         dom.searchResults.classList.remove("hidden");
         return;
       }
@@ -302,11 +479,7 @@
     } else if (e.key === "Enter" && state.searchIdx >= 0) {
       e.preventDefault();
       const item = items[state.searchIdx];
-      if (item) {
-        showGame(item.dataset.gameId);
-        dom.searchInput.value = "";
-        dom.searchResults.classList.add("hidden");
-      }
+      if (item) { showGame(item.dataset.gameId); dom.searchInput.value = ""; dom.searchResults.classList.add("hidden"); }
       return;
     } else return;
     items.forEach((it, i) => it.classList.toggle("selected", i === state.searchIdx));
@@ -331,7 +504,6 @@
     dom.randomModal.classList.remove("hidden");
   }
 
-  // === CHEAT SHEET TOGGLE ===
   function toggleCheatSheet() {
     state.cheatSheet = !state.cheatSheet;
     dom.tipsContainer.classList.toggle("cheat-sheet", state.cheatSheet);
@@ -386,18 +558,23 @@
     dom.nextRandom.addEventListener("click", showRandomTip);
     dom.randomModal.addEventListener("click", (e) => { if (e.target === dom.randomModal) dom.randomModal.classList.add("hidden"); });
 
+    // Year selector
+    dom.yearSelect.addEventListener("change", onYearChange);
+
     // Category bar
     dom.categoryBar.addEventListener("click", (e) => {
       const btn = e.target.closest(".cat-btn");
       if (btn) setCategory(btn.dataset.cat);
     });
 
-    // Filter buttons
+    // Filter buttons - now uses stored tips
     $$(".filter-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         state.currentFilter = btn.dataset.filter;
         $$(".filter-btn").forEach((b) => b.classList.toggle("active", b === btn));
-        if (state.currentGame) renderTips(state.currentGame.tips);
+        if (state.currentGame && state._currentTips) {
+          renderTips(state._currentTips, state._currentYear, state.currentGame);
+        }
       });
     });
 
@@ -445,7 +622,6 @@
         dom.searchResults.classList.add("hidden");
         dom.searchInput.value = "";
       }
-      // Ctrl/Cmd + K for search focus
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         dom.searchInput.focus();
