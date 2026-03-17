@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
-<title>PS Game Helper - PlayStation Controls & Tips</title>
+<meta name="description" content="Free PlayStation game controls, tips & tricks for 45+ games. Beginner to expert. No ads, no tracking.">
+<title>PS Game Helper - Master Every PlayStation Game</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,16 +23,28 @@
       </div>
       <div class="header-controls">
         <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Search games, controls, tips..." autocomplete="off">
+          <input type="text" id="searchInput" placeholder="Search games, controls, tips..." autocomplete="off" aria-label="Search">
           <div id="searchResults" class="search-dropdown hidden"></div>
         </div>
+        <button id="randomTip" class="icon-btn" title="Random Tip">&#127922;</button>
         <button id="favToggle" class="icon-btn" title="Favorites">&#9733;</button>
         <button id="themeToggle" class="icon-btn" title="Toggle theme">&#9789;</button>
       </div>
     </div>
-    <nav id="gameNav">
-      <!-- Populated by JS -->
-    </nav>
+    <div id="categoryBar" class="category-bar">
+      <button class="cat-btn active" data-cat="all">All</button>
+      <button class="cat-btn" data-cat="sports">Sports</button>
+      <button class="cat-btn" data-cat="action">Action</button>
+      <button class="cat-btn" data-cat="rpg">RPG</button>
+      <button class="cat-btn" data-cat="openworld">Open World</button>
+      <button class="cat-btn" data-cat="shooter">Shooter</button>
+      <button class="cat-btn" data-cat="fighting">Fighting</button>
+      <button class="cat-btn" data-cat="adventure">Adventure</button>
+      <button class="cat-btn" data-cat="racing">Racing</button>
+      <button class="cat-btn" data-cat="indie">Indie</button>
+      <button class="cat-btn" data-cat="misc">Other</button>
+    </div>
+    <nav id="gameNav"></nav>
     <div class="difficulty-legend">
       <span class="legend-item beginner">&#9679; Beginner</span>
       <span class="legend-item intermediate">&#9679; Intermediate</span>
@@ -41,13 +54,10 @@
   </header>
 
   <main id="mainContent">
-    <!-- Landing page -->
     <section id="landing" class="landing">
-      <h2>Master Your PlayStation Games</h2>
-      <p>Select a game above to discover controls from basic to expert level. The further you scroll, the more powerful the techniques.</p>
-      <div id="gameGrid" class="game-grid">
-        <!-- Populated by JS -->
-      </div>
+      <h2>Master Every PlayStation Game</h2>
+      <p>45+ games with 1,000+ controls & tips. From first-time basics to tournament-level techniques. Select a game to start.</p>
+      <div id="gameGrid" class="game-grid"></div>
       <div class="stats-bar">
         <div class="stat"><span id="statGames">0</span> Games</div>
         <div class="stat"><span id="statTips">0</span> Tips</div>
@@ -55,10 +65,12 @@
       </div>
     </section>
 
-    <!-- Game detail page -->
     <section id="gameDetail" class="game-detail hidden">
       <div class="game-header">
-        <button id="backBtn" class="back-btn">&larr; All Games</button>
+        <div class="game-header-top">
+          <button id="backBtn" class="back-btn">&larr; All Games</button>
+          <button id="cheatSheetToggle" class="icon-btn" title="Quick Reference View">&#9776;</button>
+        </div>
         <div class="game-title-row">
           <div class="game-icon-large" id="gameIconLarge"></div>
           <div>
@@ -75,29 +87,42 @@
           <button class="filter-btn" data-filter="expert">Expert</button>
         </div>
       </div>
-      <div id="tipsContainer" class="tips-container">
-        <!-- Populated by JS -->
-      </div>
+      <div id="tipsContainer" class="tips-container"></div>
       <div id="progressBar" class="progress-bar">
         <div class="progress-fill" id="progressFill"></div>
         <span id="progressText">0% explored</span>
       </div>
     </section>
 
-    <!-- Favorites page -->
     <section id="favoritesPage" class="favorites-page hidden">
       <h2>&#9733; Your Favorites</h2>
       <div id="favoritesContainer" class="tips-container"></div>
       <p id="noFavs" class="no-favs hidden">No favorites yet. Star tips to save them here!</p>
     </section>
+
+    <!-- Random tip modal -->
+    <div id="randomModal" class="modal hidden">
+      <div class="modal-content">
+        <button class="modal-close" id="closeRandom">&times;</button>
+        <div id="randomTipContent"></div>
+        <button id="nextRandom" class="filter-btn" style="margin-top:12px;">Another Random Tip</button>
+      </div>
+    </div>
   </main>
 
   <footer>
-    <p>PS Game Helper &mdash; 100% Free, No Ads, No Tracking</p>
-    <p class="footer-sub">All trademarks belong to their respective owners. This is a fan-made resource.</p>
+    <p>PS Game Helper &mdash; 100% Free, No Ads, No Tracking, No External Requests</p>
+    <p class="footer-sub">All trademarks belong to their respective owners. Fan-made resource. Not affiliated with Sony or any game publisher.</p>
   </footer>
 </div>
-<script src="games.js"></script>
+<script src="games-core.js"></script>
+<script src="games-sports.js"></script>
+<script src="games-action.js"></script>
+<script src="games-rpg.js"></script>
+<script src="games-openworld.js"></script>
+<script src="games-shooter.js"></script>
+<script src="games-fighting.js"></script>
+<script src="games-other.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

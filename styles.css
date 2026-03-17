@@ -17,7 +17,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 /* === HEADER === */
 header{background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;padding:12px 20px 0}
-.header-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:8px}
 .logo{display:flex;align-items:center;gap:12px}
 .logo h1{font-size:1.4rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .logo-icon{display:flex;gap:4px;align-items:center}
@@ -31,43 +31,52 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);position:stic
 .ps-btn.cross::after{content:"\2715"}
 .ps-btn.square::after{content:"\25A1"}
 
-.header-controls{display:flex;align-items:center;gap:10px}
+.header-controls{display:flex;align-items:center;gap:8px}
 .search-box{position:relative}
-.search-box input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);width:240px;font-size:.9rem;transition:var(--transition)}
+.search-box input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);width:260px;font-size:.9rem;transition:var(--transition)}
 .search-box input:focus{outline:none;border-color:var(--accent);box-shadow:var(--glow)}
-.search-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:0 0 8px 8px;max-height:300px;overflow-y:auto;z-index:200}
+.search-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:0 0 8px 8px;max-height:350px;overflow-y:auto;z-index:200}
 .search-dropdown .search-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:.85rem}
-.search-dropdown .search-item:hover{background:var(--bg3)}
+.search-dropdown .search-item:hover,.search-dropdown .search-item.selected{background:var(--bg3)}
 .search-dropdown .search-item .search-game{color:var(--accent);font-size:.75rem}
+.search-dropdown .search-item .search-match{color:var(--accent);font-weight:700}
 .icon-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);cursor:pointer;font-size:1.1rem;transition:var(--transition)}
 .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
 .hidden{display:none!important}
 
+/* === CATEGORY BAR === */
+.category-bar{display:flex;gap:6px;overflow-x:auto;padding:6px 0;scrollbar-width:thin}
+.category-bar::-webkit-scrollbar{height:4px}
+.category-bar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.cat-btn{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:4px 14px;color:var(--text2);cursor:pointer;white-space:nowrap;font-size:.75rem;transition:var(--transition);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.cat-btn:hover,.cat-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
 /* === NAV === */
-#gameNav{display:flex;gap:6px;overflow-x:auto;padding:10px 0;scrollbar-width:thin}
+#gameNav{display:flex;gap:6px;overflow-x:auto;padding:8px 0;scrollbar-width:thin}
 #gameNav::-webkit-scrollbar{height:4px}
 #gameNav::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-.nav-btn{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:6px 14px;color:var(--text2);cursor:pointer;white-space:nowrap;font-size:.8rem;transition:var(--transition);display:flex;align-items:center;gap:6px}
+.nav-btn{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;color:var(--text2);cursor:pointer;white-space:nowrap;font-size:.78rem;transition:var(--transition);display:flex;align-items:center;gap:5px}
 .nav-btn:hover,.nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.nav-btn .nav-icon{width:18px;height:18px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.nav-btn .nav-icon{width:16px;height:16px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
 
-.difficulty-legend{display:flex;gap:16px;padding:6px 0 10px;font-size:.75rem;color:var(--text2)}
+.difficulty-legend{display:flex;gap:16px;padding:4px 0 8px;font-size:.75rem;color:var(--text2)}
 .legend-item.beginner{color:var(--beginner)}
 .legend-item.intermediate{color:var(--intermediate)}
 .legend-item.advanced{color:var(--advanced)}
 .legend-item.expert{color:var(--expert)}
 
 /* === LANDING === */
-.landing{padding:40px 20px;text-align:center;max-width:1200px;margin:0 auto}
+.landing{padding:30px 20px;text-align:center;max-width:1200px;margin:0 auto}
 .landing h2{font-size:2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.landing p{color:var(--text2);margin-bottom:30px;font-size:1.05rem}
-.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:30px}
-.game-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:var(--transition);text-align:center}
+.landing p{color:var(--text2);margin-bottom:24px;font-size:1.05rem}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.game-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:var(--transition);text-align:center}
 .game-card:hover{transform:translateY(-4px);box-shadow:var(--glow);border-color:var(--accent)}
-.game-card .card-icon{width:60px;height:60px;border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:28px}
-.game-card h3{font-size:1rem;margin-bottom:4px}
-.game-card .card-genre{font-size:.75rem;color:var(--text2)}
-.game-card .card-count{font-size:.7rem;color:var(--accent);margin-top:6px}
+.game-card .card-icon{width:52px;height:52px;border-radius:10px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.game-card h3{font-size:.9rem;margin-bottom:2px}
+.game-card .card-genre{font-size:.7rem;color:var(--text2)}
+.game-card .card-count{font-size:.65rem;color:var(--accent);margin-top:4px}
+.game-card .card-cat{font-size:.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
 
 .stats-bar{display:flex;justify-content:center;gap:40px;padding:20px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)}
 .stat{text-align:center}
@@ -76,7 +85,8 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);position:stic
 /* === GAME DETAIL === */
 .game-detail{max-width:900px;margin:0 auto;padding:20px}
 .game-header{margin-bottom:20px}
-.back-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.9rem;padding:8px 0;margin-bottom:12px}
+.game-header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.back-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.9rem;padding:8px 0}
 .back-btn:hover{text-decoration:underline}
 .game-title-row{display:flex;align-items:center;gap:16px;margin-bottom:16px}
 .game-icon-large{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0}
@@ -92,9 +102,12 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);position:stic
 .filter-btn[data-filter="advanced"].active{background:var(--advanced);border-color:var(--advanced)}
 .filter-btn[data-filter="expert"].active{background:var(--expert);border-color:var(--expert)}
 
+/* === SECTION HEADERS === */
+.section-header{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);padding:12px 0 4px;border-bottom:1px solid var(--border);margin-top:8px}
+
 /* === TIP CARDS === */
-.tips-container{display:flex;flex-direction:column;gap:12px}
-.tip-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;transition:var(--transition);position:relative;overflow:hidden}
+.tips-container{display:flex;flex-direction:column;gap:10px}
+.tip-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;transition:var(--transition);position:relative;overflow:hidden}
 .tip-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
 .tip-card.beginner::before{background:var(--beginner)}
 .tip-card.intermediate::before{background:var(--intermediate)}
@@ -102,23 +115,31 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);position:stic
 .tip-card.expert::before{background:var(--expert)}
 .tip-card:hover{border-color:var(--accent);box-shadow:var(--glow)}
 
-.tip-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
-.tip-title{font-size:1rem;font-weight:600}
+.tip-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.tip-title{font-size:.95rem;font-weight:600}
 .tip-badges{display:flex;gap:6px;align-items:center}
-.tip-level{font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase;color:#fff}
+.tip-level{font-size:.6rem;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase;color:#fff}
 .tip-level.beginner{background:var(--beginner)}
 .tip-level.intermediate{background:var(--intermediate)}
 .tip-level.advanced{background:var(--advanced)}
 .tip-level.expert{background:var(--expert)}
-.fav-btn{background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--text2);transition:var(--transition);padding:2px}
+.fav-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text2);transition:var(--transition);padding:2px}
 .fav-btn:hover,.fav-btn.active{color:#f59e0b}
 
-.tip-controls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-.control-badge{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:.75rem;font-family:'SF Mono',Consolas,monospace;color:var(--accent);font-weight:600}
+.tip-controls{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+.control-badge{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:.73rem;font-family:'SF Mono',Consolas,monospace;color:var(--accent);font-weight:600}
 
-.tip-desc{color:var(--text2);font-size:.88rem;line-height:1.6}
-.tip-why{margin-top:8px;padding:8px 12px;background:var(--bg3);border-radius:8px;font-size:.82rem;color:var(--text)}
+.tip-desc{color:var(--text2);font-size:.85rem;line-height:1.5}
+.tip-why{margin-top:6px;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:.8rem;color:var(--text)}
 .tip-why strong{color:var(--accent)}
+
+/* === CHEAT SHEET VIEW === */
+.cheat-sheet .tip-card{padding:8px 14px}
+.cheat-sheet .tip-why{display:none}
+.cheat-sheet .tip-desc{display:none}
+.cheat-sheet .tip-header{margin-bottom:2px}
+.cheat-sheet .tip-controls{margin-bottom:0}
+.cheat-sheet .section-header{padding:8px 0 2px}
 
 /* === PROGRESS BAR === */
 .progress-bar{position:fixed;bottom:0;left:0;right:0;height:32px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 20px;z-index:100}
@@ -131,6 +152,12 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);position:stic
 .no-favs{text-align:center;color:var(--text2);padding:40px;font-size:1.1rem}
 .fav-tip-game{font-size:.7rem;color:var(--accent);margin-bottom:4px}
 
+/* === MODAL === */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:300;padding:20px}
+.modal-content{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:500px;width:100%;position:relative;max-height:80vh;overflow-y:auto}
+.modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--text2);font-size:1.4rem;cursor:pointer}
+.modal-close:hover{color:var(--text)}
+
 /* === FOOTER === */
 footer{text-align:center;padding:30px 20px;color:var(--text2);font-size:.8rem;border-top:1px solid var(--border);margin-top:40px}
 .footer-sub{font-size:.7rem;margin-top:4px;opacity:.6}
@@ -141,7 +168,7 @@ footer{text-align:center;padding:30px 20px;color:var(--text2);font-size:.8rem;bo
   .header-controls{justify-content:space-between}
   .search-box input{width:100%}
   .search-box{flex:1}
-  .game-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .game-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
   .landing h2{font-size:1.4rem}
   .stats-bar{gap:20px}
   .game-title-row{flex-direction:column;text-align:center}
@@ -149,17 +176,18 @@ footer{text-align:center;padding:30px 20px;color:var(--text2);font-size:.8rem;bo
 }
 @media(max-width:480px){
   .game-grid{grid-template-columns:1fr 1fr}
-  .game-card{padding:14px}
+  .game-card{padding:12px}
   .filter-row{overflow-x:auto;flex-wrap:nowrap}
+  .category-bar{gap:4px}
 }
 
 /* === ANIMATIONS === */
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .tip-card{animation:fadeIn .3s ease both}
-.tip-card:nth-child(2){animation-delay:.05s}
-.tip-card:nth-child(3){animation-delay:.1s}
-.tip-card:nth-child(4){animation-delay:.15s}
-.tip-card:nth-child(5){animation-delay:.2s}
+.tip-card:nth-child(2){animation-delay:.03s}
+.tip-card:nth-child(3){animation-delay:.06s}
+.tip-card:nth-child(4){animation-delay:.09s}
+.tip-card:nth-child(5){animation-delay:.12s}
 
 /* === SCROLLBAR === */
 ::-webkit-scrollbar{width:8px}
